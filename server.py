@@ -139,7 +139,12 @@ def _analyze_data_urls(data_urls: list[str], prompt: str) -> str:
 
 @mcp.tool()
 def analyze_image(path: str, prompt: str = "Analyze this image and extract all visible information.") -> str:
-    """Analyze a local image file with the configured vision model."""
+    """使用视觉模型分析一张本地图片。
+
+    可用于图片描述、OCR 文字提取、截图排错、表格识别、界面分析和图表解读。
+    path 必须是本机图片的绝对路径，支持 JPEG、PNG、WebP 和 BMP。prompt 用于
+    指定分析目标；函数返回视觉模型生成的文本结果。
+    """
     image_path = _validate_image_path(path)
     return _analyze_data_urls([_file_image_to_data_url(image_path)], prompt)
 
@@ -149,7 +154,12 @@ def analyze_images(
     paths: list[str],
     prompt: str = "Analyze these images together and extract all visible information.",
 ) -> str:
-    """Analyze multiple local image files with the configured vision model."""
+    """使用视觉模型在同一次请求中联合分析多张本地图片。
+
+    适合比较前后变化、理解连续截图、分析多页扫描件，或汇总分散在多张图片中的
+    信息。paths 必须是非空的本机图片绝对路径列表，prompt 用于说明需要跨图片
+    完成的任务；函数返回统一的文本分析结果。
+    """
     if not paths:
         raise ValueError("At least one image path is required.")
     image_paths = [_validate_image_path(path) for path in paths]
@@ -158,7 +168,12 @@ def analyze_images(
 
 @mcp.tool()
 def analyze_pdf(path: str, prompt: str = "Analyze these PDF pages and extract all visible information.") -> str:
-    """Render the first pages of a local PDF and analyze them with the configured vision model."""
+    """将本地 PDF 页面渲染为图片并交给视觉模型分析。
+
+    适合扫描版 PDF、复杂图文排版、报告和普通文本提取工具难以处理的文档。
+    path 必须是本机 PDF 的绝对路径。默认分析前 3 页，页数和渲染清晰度可通过
+    环境变量调整；函数返回模型对所渲染页面的文本分析结果。
+    """
     if fitz is None:
         raise RuntimeError("PyMuPDF is not installed.")
     pdf_path = Path(path).expanduser().resolve()
